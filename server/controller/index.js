@@ -1,28 +1,32 @@
-const Products = require("../database/build");
+const { addProductQuery, getProductsQuery } = require("../database/query");
 
 const createProducts = (req, res) => {
   const { title, description, price } = req.body;
-  Products.create({
-    title: title,
-    description: description,
-    price: price,
-  })
-    .then((product) => {
-      res.status(201).json(product);
-    })
-    .catch(() => {
-      res.status(500).json({ error: "Error creating product" });
-    });
+
+  addProductQuery({ title, description, price })
+        .then(() => {
+          res.status(201).json({
+            error: false,
+            data: {
+              message: 'Product has been created successfully'
+            }
+          })
+        })
+        .catch((err) => {
+          console.error(err)
+          res.status(500).json({
+            error: true,
+            data: {
+              message: 'An error occurred while creating Product'
+            }
+          })
+        })
 };
 
 const getProducts = (req, res) => {
-  Products.findAll()
-    .then((product) => {
-      res.json(product);
-    })
-    .catch((err) => {
-      console.error("Error retrieving products:", err);
-    });
+  getProductsQuery()
+    .then((data) => res.status(200).json(data.rows))
+    .catch((err) => console.log(err))
 };
 
 module.exports = { createProducts, getProducts };
